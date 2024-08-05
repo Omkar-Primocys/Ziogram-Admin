@@ -8,6 +8,7 @@ import AccountSetting from '../pages/Pages/Admin/AccountSetting';
 import Users from '../pages/Pages/Admin/UserDetails';
 import ReportedUserList from '../components/User/ReportedUserDetails';
 import ListAllProduct from '../components/Ecommerce/Product/ListAllProduct';
+import AddProduct from '../pages/Pages/Ecom/Admin/AddProduct';
 
 
 const LoginBoxed = lazy(() => import('../pages/Authentication/LoginBoxed'));
@@ -60,6 +61,12 @@ const routes = [
     path: '/products/list-all-product',
     element: (<ProtectedRoute>
       <ListAllProduct />
+    </ProtectedRoute>),
+  },
+  {
+    path: '/products/add-new-Product',
+    element: (<ProtectedRoute>
+      <AddProduct/>
     </ProtectedRoute>),
   },
 

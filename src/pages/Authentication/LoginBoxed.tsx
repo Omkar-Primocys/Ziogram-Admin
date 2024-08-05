@@ -40,9 +40,12 @@ const LoginBoxed = () => {
         }
         try {
             const response = await postData('adminLogin', { admin_id, admin_password });
+            // console.log(response);
             if (!response || response.success === false) {
                 setError(response.message || 'Login failed');
                 return;
+                
+                
             } else {
                 Cookies.set('token', response.token, { expires: 30 });
                 dispatch(setAdminDetails({
@@ -51,6 +54,9 @@ const LoginBoxed = () => {
                     isAdmin: true,
                     adminEmail: admin_id
                 }));
+
+                console.log(response.isAdmin.profile_pic);
+                
                 navigate('/');
             }
         } catch (err: any) {

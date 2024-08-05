@@ -39,10 +39,11 @@ const UserList: React.FC = () => {
 
 
             const response = await postData('getAllUser', { page: currentPage, limit });
+            console.log(response);
+            
             if (response && response.allUsers) {
                 setUsers(response.allUsers);
-                console.log(users);
-                
+                console.log(users);                
                 setTotalPages(response.pagination.pages);
             }
         } catch (err: any) {

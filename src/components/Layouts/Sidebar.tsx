@@ -263,7 +263,7 @@ const Sidebar = () => {
                                             <NavLink to="/products/list-all-product">{t('List all Products')}</NavLink>
                                         </li>
                                         <li>
-                                            <NavLink to="/products/accordions">{t('accordions')}</NavLink>
+                                            <NavLink to="/products/add-new-Product">{t('Add new Product')}</NavLink>
                                         </li>
                                         <li>
                                             <NavLink to="/products/modals">{t('modals')}</NavLink>
