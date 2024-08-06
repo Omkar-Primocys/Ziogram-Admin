@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Swal from 'sweetalert2';
 import useApiPost from "../../../hooks/PostData";
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 interface Product {
     product_thumbnail: string;
@@ -23,6 +23,7 @@ const ListAllProduct: React.FC = () => {
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [totalPages, setTotalPages] = useState<number>(1);
     const { postData } = useApiPost();
+    const navigate = useNavigate();
 
     const limit = 10;
 
@@ -53,8 +54,9 @@ const ListAllProduct: React.FC = () => {
         fetchProducts();
     }, [currentPage]);
 
+
     const handleView = (product: Product) => {
-        alert(`View product ${product.product_id}`);
+        navigate(`/products/ProductById`, { state: { product_id: product.product_id } });
     };
 
     const handleDelete = async (product: Product) => {
@@ -74,7 +76,6 @@ const ListAllProduct: React.FC = () => {
 
         if (result.isConfirmed) {
             try {
-              // alert(`Delete product ${product.product_id}`);
                 const response = await postData('deleteProduct', { product_id: product.product_id });
                 
                 if (response.success === 'true') {

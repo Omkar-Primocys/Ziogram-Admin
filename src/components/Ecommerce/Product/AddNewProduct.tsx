@@ -1,205 +1,235 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import 'sweetalert2/dist/sweetalert2.min.css';
+import 'file-upload-with-preview/dist/style.css';
+import ImageUploading, { ImageListType } from 'react-images-uploading';
+import useApiPost from '../../../hooks/PostData'; // Adjust the import path as necessary
 
 const AddProductForm = () => {
-  const [variants, setVariants] = useState([{ color: '', size: '', type: '' }]);
-  const [types, setTypes] = useState([]);
+  const { loading, error, data, postData } = useApiPost();
+  const [categories, setCategories] = useState([]);
+  const [filteredCategories, setFilteredCategories] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [images2, setImages2] = useState<any>([]);
+  const [originalPrice, setOriginalPrice] = useState('');
+  const [salePrice, setSalePrice] = useState('');
+  const maxNumber = 69;
 
-  const handleAddVariant = () => {
-    setVariants([...variants, { color: '', size: '', type: '' }]);
-  };
+  useEffect(() => {
+    fetchCategories();
+  }, []);
 
-  const handleVariantChange = (index, event) => {
-    const newVariants = variants.map((variant, i) => {
-      if (i === index) {
-        return { ...variant, [event.target.name]: event.target.value };
+  const fetchCategories = async () => {
+    try {
+      const response = await postData('search-category-for-add-product', {});
+      if (response.success === 'true') {
+        setCategories(response.isCategory);
+        setFilteredCategories(response.isCategory);
       }
-      return variant;
-    });
-    setVariants(newVariants);
+    } catch (err) {
+      console.error('Error fetching categories:', err);
+    }
   };
 
-  const handleRemoveVariant = (index) => {
-    setVariants(variants.filter((_, i) => i !== index));
+  const handleCategoryChange = (event: { target: { value: React.SetStateAction<string>; }; }) => {
+    setSelectedCategory(event.target.value);
   };
 
-  const handleAddType = () => {
-    setTypes([...types, '']);
+  const onChange2 = (imageList: ImageListType, addUpdateIndex: number[] | undefined) => {
+    setImages2(imageList as never[]);
   };
 
-  const handleTypeChange = (index, event) => {
-    const newTypes = types.map((type, i) => {
-      if (i === index) {
-        return event.target.value;
-      }
-      return type;
-    });
-    setTypes(newTypes);
+  const handleOriginalPriceChange = (event: { target: { value: any; }; }) => {
+    const value = event.target.value;
+    setOriginalPrice(value);
+    setSalePrice(value); // Automatically set sale price to original price
   };
 
-  const handleRemoveType = (index) => {
-    setTypes(types.filter((_, i) => i !== index));
+  const handleSalePriceChange = (event: { target: { value: React.SetStateAction<string>; }; }) => {
+    setSalePrice(event.target.value);
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event: { preventDefault: () => void; target: HTMLFormElement | undefined; }) => {
     event.preventDefault();
-    const toast = Swal.mixin({
-      toast: true,
-      position: 'top',
-      showConfirmButton: false,
-      timer: 3000,
+
+    // Check if at least one image is uploaded
+    if (images2.length === 0) {
+      Swal.fire({
+        icon: 'error',
+        title: 'No Image Uploaded',
+        toast: true,
+        timer: 3000,
+
+        position: 'top',
+        // text: 'Please upload at least one image.',
+      });
+      return; // Prevent form submission
+    }
+
+    const formData = new FormData(event.target);
+    formData.append('categorySelect', selectedCategory);
+
+    images2.forEach((image: { file: string | Blob; }) => {
+      formData.append('files', image.file);
     });
-    toast.fire({
-      icon: 'success',
-      title: 'Form submitted successfully',
-      padding: '10px 20px',
-    });
+
+    try {
+      const response = await postData('addProduct', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      if (response.success === "true") {
+        Swal.fire({
+          icon: 'success',
+          title: 'Form submitted successfully',
+          // toast: true,
+          // position: 'top',
+          showConfirmButton: true,
+          timer: 3000,
+        });
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error submitting form',
+          text: response.message,
+        });
+      }
+    } catch (err) {
+      console.error('Error submitting form:', err);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error submitting form',
+        text: 'An error occurred while submitting the form.',
+      });
+    }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5 p-6 bg-white dark:bg-gray-900 rounded-lg shadow-md max-w-3xl mx-auto">
-      <h2 className="text-3xl font-bold mb-6 text-gray-900 dark:text-gray-200 text-center">Add Product</h2>
-      
-      <div>
-        <label className="block text-gray-700 dark:text-gray-300">Product Thumbnail Image (Max size 2 Mb)</label>
-        <div className="relative w-32 h-32 mx-auto mt-2 border rounded-md overflow-hidden">
-          <img src="thumbnail-placeholder.png" alt="Product Thumbnail" className="object-cover w-full h-full" />
-          <div className="absolute inset-0 flex items-center justify-center">
-            <button className="bg-gray-700 text-white p-1 rounded-full">+</button>
+    <div className='p-4'>
+      <ul className="flex space-x-2 rtl:space-x-reverse text-sm text-gray-700 mb-7">
+        <li>
+          <Link to="#" className="text-blue-500 hover:underline">
+            Products
+          </Link>
+        </li>
+        <li className="before:content-['/'] ltr:before:mr-2 rtl:before:ml-2 text-gray-500">
+          <span>Add New Product</span>
+        </li>
+      </ul>
+      <form className="space-y-5" onSubmit={handleSubmit} encType="multipart/form-data">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label htmlFor="Product_name" className="block text-sm font-medium text-gray-700">Product Name</label>
+            <input id="Product_name" name="Product_name" type="text" placeholder="Product Name" required className="form-input mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" />
           </div>
-        </div>
-      </div>
-      
-      <div>
-        <label className="block text-gray-700 dark:text-gray-300">Product Multiple Image (Max size 2 Mb)</label>
-        <div className="relative w-full h-32 mt-2 border-dashed border-2 border-gray-300 rounded-md flex items-center justify-center">
-          <input type="file" multiple className="absolute inset-0 opacity-0 cursor-pointer" />
-          <span className="text-gray-500">Add Product Image</span>
-        </div>
-        <div className="mt-4 flex space-x-2 overflow-x-auto">
-          {[1, 2, 3, 4, 5].map((_, index) => (
-            <div key={index} className="relative w-24 h-24 border rounded-md overflow-hidden flex-shrink-0">
-              <img src="image-placeholder.png" alt="Product" className="object-cover w-full h-full" />
-              <button className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full">x</button>
-            </div>
-          ))}
-        </div>
-      </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <div>
-          <label htmlFor="Product_name" className="block text-gray-700 dark:text-gray-300">Product Name</label>
-          <input type="text" id="Product_name" name="Product_name" placeholder="Enter Product Name" className="form-input mt-1 p-2 border rounded-md dark:bg-gray-800 dark:text-gray-200" required />
-        </div>
-        <div>
-          <label htmlFor="category_name" className="block text-gray-700 dark:text-gray-300">Category Name</label>
-          <input type="text" id="category_name" name="category_name" placeholder="Enter Category Name" className="form-input mt-1 p-2 border rounded-md dark:bg-gray-800 dark:text-gray-200" required />
-        </div>
-      </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <div>
-          <label htmlFor="original_price" className="block text-gray-700 dark:text-gray-300">Original Price</label>
-          <input type="number" id="original_price" name="original_price" placeholder="Enter Original Price" className="form-input mt-1 p-2 border rounded-md dark:bg-gray-800 dark:text-gray-200" required />
-        </div>
-        <div>
-          <label htmlFor="sale_price" className="block text-gray-700 dark:text-gray-300">Sales Price</label>
-          <input type="number" id="sale_price" name="sale_price" placeholder="Enter Sales Price" className="form-input mt-1 p-2 border rounded-md dark:bg-gray-800 dark:text-gray-200" required />
-        </div>
-      </div>
-      
-      <div>
-        <label className="block text-gray-700 dark:text-gray-300">Attributes</label>
-        {variants.map((variant, index) => (
-          <div key={index} className="relative mt-2 p-4 border rounded-md dark:bg-gray-800 dark:text-gray-200 space-y-2">
-            <button
-              type="button"
-              onClick={() => handleRemoveVariant(index)}
-              className="absolute top-2 right-2 text-red-500 hover:text-red-700"
+          <div>
+            <label htmlFor="categorySelect" className="block text-sm font-medium text-gray-700">Category</label>
+            <select
+              id="categorySelect"
+              name="categorySelect"
+              value={selectedCategory}
+              onChange={handleCategoryChange}
+              required
+              className="form-select mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
             >
-              &times;
-            </button>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-              <input
-                type="text"
-                name="color"
-                placeholder="Color"
-                value={variant.color}
-                onChange={(event) => handleVariantChange(index, event)}
-                className="form-input mt-1 p-2 border rounded-md dark:bg-gray-800 dark:text-gray-200"
-              />
-              <input
-                type="text"
-                name="size"
-                placeholder="Size"
-                value={variant.size}
-                onChange={(event) => handleVariantChange(index, event)}
-                className="form-input mt-1 p-2 border rounded-md dark:bg-gray-800 dark:text-gray-200"
-              />
-              <input
-                type="text"
-                name="type"
-                placeholder="Type"
-                value={variant.type}
-                onChange={(event) => handleVariantChange(index, event)}
-                className="form-input mt-1 p-2 border rounded-md dark:bg-gray-800 dark:text-gray-200"
-              />
-            </div>
+              <option value="">Select a category</option>
+              {filteredCategories.map(category => (
+                <option key={category.category_id} value={category.category_id}>
+                  {category.category_name}
+                </option>
+              ))}
+            </select>
           </div>
-        ))}
-        <button
-          type="button"
-          onClick={handleAddVariant}
-          className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-        >
-          Add Attribute
-        </button>
-      </div>
-      
-      <div className="flex items-center mt-4">
-        <button
-          type="button"
-          onClick={handleAddType}
-          className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-        >
-          Add Type
-        </button>
-        {types.map((type, index) => (
-          <div key={index} className="relative mt-2 ml-2 p-2 border rounded-md dark:bg-gray-800 dark:text-gray-200">
-            <input
-              type="text"
-              value={type}
-              onChange={(event) => handleTypeChange(index, event)}
-              className="form-input p-2 border rounded-md dark:bg-gray-800 dark:text-gray-200"
+        </div>
+        <div>
+          <label htmlFor="Product_desc" className="block text-sm font-medium text-gray-700">Product Description</label>
+          <input id="Product_desc" name="Product_desc" type="text" placeholder="Enter Main Description" required className="form-input mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" />
+        </div>
+        <div>
+          <label htmlFor="Additional_desc" className="block text-sm font-medium text-gray-700">Additional Description</label>
+          <input id="Additional_desc" name="Additional_desc" type="text" placeholder="Additional Description" required className="form-input mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="md:col-span-1">
+            <label htmlFor="original_price" className="block text-sm font-medium text-gray-700">Original Price</label>
+            <input 
+              id="original_price" 
+              name="original_price" 
+              type="number" 
+              placeholder="Original Price" 
+              required 
+              value={originalPrice}
+              onChange={handleOriginalPriceChange}
+              className="form-input mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" 
             />
-            <button
-              type="button"
-              onClick={() => handleRemoveType(index)}
-              className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full"
-            >
-              x
-            </button>
           </div>
-        ))}
-      </div>
-
-      <div>
-        <label htmlFor="Product_desc" className="block text-gray-700 dark:text-gray-300">Product Description</label>
-        <textarea id="Product_desc" name="Product_desc" placeholder="Enter Product Description" className="form-input mt-1 p-2 border rounded-md dark:bg-gray-800 dark:text-gray-200" required></textarea>
-      </div>
-
-      <div className="flex items-center mt-4">
-        <input type="checkbox" id="agree" className="form-checkbox" required />
-        <label htmlFor="agree" className="ml-2 text-gray-700 dark:text-gray-300">I agree to the terms and conditions</label>
-      </div>
-
-      <div className="flex justify-center mt-6">
-        <button type="submit" className="px-6 py-3 bg-blue-500 text-white rounded-md hover:bg-blue-600">
+          <div className="md:col-span-1">
+            <label htmlFor="sale_price" className="block text-sm font-medium text-gray-700">Sale Price</label>
+            <input 
+              id="sale_price" 
+              name="sale_price" 
+              type="number" 
+              placeholder="Sale Price" 
+              required 
+              value={salePrice}
+              onChange={handleSalePriceChange}
+              className="form-input mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" 
+            />
+          </div>
+          <div className="md:col-span-1">
+            <label htmlFor="in_stock" className="block text-sm font-medium text-gray-700">In Stock</label>
+            <input id="in_stock" name="in_stock" type="number" placeholder="In Stock" required className="form-input mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" />
+          </div>
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Upload Images</label>
+          <ImageUploading multiple value={images2} onChange={onChange2} maxNumber={maxNumber}>
+            {({ imageList, onImageUpload, onImageRemove }) => (
+              <div>
+                <button
+                  type="button"
+                  className="bg-blue-500 text-white px-4 py-2 rounded-md mt-2"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    onImageUpload();
+                  }}
+                >
+                  Choose File...
+                </button>
+                <div className="grid grid-cols-1 sm:grid-cols-6 gap-4 mt-4">
+                  {imageList.map((image, index) => (
+                    <div key={index} className="relative">
+                      <button
+                        type="button"
+                        className="absolute top-2 right-2 bg-blue-600 text-gray-200 rounded-full p-1 px-2 text-xs"
+                        title="Clear Image"
+                        onClick={() => onImageRemove(index)}
+                      >
+                        ×
+                      </button>
+                      <img
+                        src={image.dataURL}
+                        alt="Preview"
+                        className="w-52 h- object-cover rounded-lg shadow-md"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </ImageUploading>
+          {images2.length === 0 && (
+            <img src="/assets/images/file-preview.svg" className="max-w-md w-1/3 mx-auto mt-4" alt="File Preview" />
+          )}
+        </div>
+        <button type="submit" className="bg-blue-500 text-white px-6 py-3 rounded-md mt-6">
           Submit
         </button>
-      </div>
-    </form>
+      </form>
+    </div>
   );
 };
 

@@ -137,7 +137,7 @@ const UserList: React.FC = () => {
                     </Link>
                 </li>
                 <li className="before:content-['/'] ltr:before:mr-2 rtl:before:ml-2 text-gray-500">
-                    <span>Account Settings</span>
+                    <span>User Details</span>
                 </li>
             </ul>
             <div className="mt-6 overflow-x-auto">
