@@ -58,6 +58,9 @@ const ListAllProduct: React.FC = () => {
     const handleView = (product: Product) => {
         navigate(`/products/ProductById`, { state: { product_id: product.product_id } });
     };
+    const handleEdit = (product: Product) => {
+        navigate(`/products/editProduct`, { state: { product_id: product.product_id } });
+    };
 
     const handleDelete = async (product: Product) => {
         const result = await Swal.fire({
@@ -140,6 +143,11 @@ const ListAllProduct: React.FC = () => {
                                             onClick={() => handleView(product)}
                                         >
                                             View
+                                        </button>
+                                        <button type="button" className="btn btn-warning"
+                                            onClick={() => handleEdit(product)}
+                                        >
+                                            Edit
                                         </button>
                                         <button type="button" className="btn btn-danger"
                                             onClick={() => handleDelete(product)}

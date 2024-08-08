@@ -5,6 +5,8 @@ import 'sweetalert2/dist/sweetalert2.min.css';
 import 'file-upload-with-preview/dist/style.css';
 import ImageUploading, { ImageListType } from 'react-images-uploading';
 import useApiPost from '../../../hooks/PostData'; // Adjust the import path as necessary
+import Tippy from '@tippyjs/react';
+import 'tippy.js/dist/tippy.css';
 
 const AddProductForm = () => {
   const { loading, error, data, postData } = useApiPost();
@@ -14,6 +16,8 @@ const AddProductForm = () => {
   const [images2, setImages2] = useState<any>([]);
   const [originalPrice, setOriginalPrice] = useState('');
   const [salePrice, setSalePrice] = useState('');
+  const [inStockEnabled, setInStockEnabled] = useState(true); // State for toggle button
+  const [inStock, setInStock] = useState(''); // State for "In Stock" field
   const maxNumber = 69;
 
   useEffect(() => {
@@ -43,11 +47,35 @@ const AddProductForm = () => {
   const handleOriginalPriceChange = (event: { target: { value: any; }; }) => {
     const value = event.target.value;
     setOriginalPrice(value);
-    setSalePrice(value); // Automatically set sale price to original price
+    // setSalePrice(value); // Automatically set sale price to original price
   };
 
-  const handleSalePriceChange = (event: { target: { value: React.SetStateAction<string>; }; }) => {
-    setSalePrice(event.target.value);
+  const handleSalePriceChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const newSalePrice = event.target.value;
+
+    if (parseFloat(newSalePrice) > parseFloat(originalPrice)) {
+      setSalePrice(originalPrice); // Set sale price to original price
+      Swal.fire({
+        icon: 'warning',
+        title: 'Sale Price is Greater than Original Price',
+        text: 'Sale price has been set to the original price.',
+        showConfirmButton: true,
+      });
+    } else {
+      setSalePrice(newSalePrice);
+    }
+  };
+
+
+  const handleToggleInStock = () => {
+    setInStockEnabled(!inStockEnabled);
+    if (!inStockEnabled) {
+      setInStock(''); // Clear the inStock value if toggled off
+    }
+  };
+
+  const handleInStockChange = (event: { target: { value: React.SetStateAction<string>; }; }) => {
+    setInStock(event.target.value);
   };
 
   const handleSubmit = async (event: { preventDefault: () => void; target: HTMLFormElement | undefined; }) => {
@@ -60,9 +88,7 @@ const AddProductForm = () => {
         title: 'No Image Uploaded',
         toast: true,
         timer: 3000,
-
         position: 'top',
-        // text: 'Please upload at least one image.',
       });
       return; // Prevent form submission
     }
@@ -85,8 +111,6 @@ const AddProductForm = () => {
         Swal.fire({
           icon: 'success',
           title: 'Form submitted successfully',
-          // toast: true,
-          // position: 'top',
           showConfirmButton: true,
           timer: 3000,
         });
@@ -122,11 +146,22 @@ const AddProductForm = () => {
       <form className="space-y-5" onSubmit={handleSubmit} encType="multipart/form-data">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label htmlFor="Product_name" className="block text-sm font-medium text-gray-700">Product Name</label>
+            <label htmlFor="Product_name" className="block text-sm font-medium text-gray-700">
+              Product Name <span className="text-red-500">*</span>
+              <Tippy trigger="click" content="Enter the product name" placement="right">
+                <span className="mx-3 border-2 rounded-full px-1.5 text-[9px] border-gray-400 dark:border-gray-800">!</span>
+              </Tippy>
+            </label>
             <input id="Product_name" name="Product_name" type="text" placeholder="Product Name" required className="form-input mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" />
           </div>
           <div>
-            <label htmlFor="categorySelect" className="block text-sm font-medium text-gray-700">Category</label>
+            <label htmlFor="categorySelect" className="block text-sm font-medium text-gray-700">
+              Category
+              <span className="text-red-500">*</span>
+              <Tippy trigger="click" content="Enter the product name" placement="right">
+                <span className="mx-3 border-2 rounded-full px-1.5 text-[9px] border-gray-400 dark:border-gray-800">!</span>
+              </Tippy>
+            </label>
             <select
               id="categorySelect"
               name="categorySelect"
@@ -145,47 +180,115 @@ const AddProductForm = () => {
           </div>
         </div>
         <div>
-          <label htmlFor="Product_desc" className="block text-sm font-medium text-gray-700">Product Description</label>
-          <input id="Product_desc" name="Product_desc" type="text" placeholder="Enter Main Description" required className="form-input mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" />
+          <label htmlFor="Product_desc" className="block text-sm font-medium text-gray-700">
+            Product Description
+            <span className="text-red-500">*</span>
+            <Tippy trigger="click" content="Enter the product name" placement="right">
+              <span className="mx-3 border-2 rounded-full px-1.5 text-[9px] border-gray-400 dark:border-gray-800">!</span>
+            </Tippy>
+          </label>
+          <textarea
+            id="Product_desc"
+            name="Product_desc"
+            placeholder="Enter Main Description"
+            required
+            className="form-textarea mt-1 block w-full h-32 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
+          />
         </div>
         <div>
-          <label htmlFor="Additional_desc" className="block text-sm font-medium text-gray-700">Additional Description</label>
-          <input id="Additional_desc" name="Additional_desc" type="text" placeholder="Additional Description" required className="form-input mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" />
-        </div>
+          <label htmlFor="Additional_desc" className="block text-sm font-medium text-gray-700">
+            Additional Description
+            <Tippy trigger="click" content="Enter the product name" placement="right">
+              <span className="mx-3 border-2 rounded-full px-1.5 text-[9px] border-gray-400 dark:border-gray-800">!</span>
+            </Tippy>
+          </label>
+          <textarea
+            id="Additional_desc"
+            name="Additional_desc"
+            placeholder="Enter additional Description"
+            className="form-textarea mt-1 block w-full h-32 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
+          />        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <div className="md:col-span-1">
-            <label htmlFor="original_price" className="block text-sm font-medium text-gray-700">Original Price</label>
-            <input 
-              id="original_price" 
-              name="original_price" 
-              type="number" 
-              placeholder="Original Price" 
-              required 
+            <label htmlFor="original_price" className="block text-sm font-medium text-gray-700">
+              Original Price
+              <span className="text-red-500">*</span>
+              <Tippy trigger="click" content="Enter the product name" placement="right">
+                <span className="mx-3 border-2 rounded-full px-1.5 text-[9px] border-gray-400 dark:border-gray-800">!</span>
+              </Tippy>
+            </label>
+            <input
+              id="original_price"
+              name="original_price"
+              type="number"
+              placeholder="Original Price"
+              required
               value={originalPrice}
               onChange={handleOriginalPriceChange}
-              className="form-input mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" 
+              className="form-input mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
             />
           </div>
           <div className="md:col-span-1">
-            <label htmlFor="sale_price" className="block text-sm font-medium text-gray-700">Sale Price</label>
-            <input 
-              id="sale_price" 
-              name="sale_price" 
-              type="number" 
-              placeholder="Sale Price" 
-              required 
+            <label htmlFor="sale_price" className="block text-sm font-medium text-gray-700">
+              Sale Price
+              <Tippy trigger="click" content="Enter the product name" placement="right">
+                <span className="mx-1 border-2 rounded-full px-1.5 text-[9px] border-gray-400 dark:border-gray-800">!</span>
+              </Tippy>
+            </label>
+            <input
+              id="sale_price"
+              name="sale_price"
+              type="number"
               value={salePrice}
+              placeholder="Sale Price"
               onChange={handleSalePriceChange}
-              className="form-input mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" 
+              className="form-input mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
             />
           </div>
           <div className="md:col-span-1">
-            <label htmlFor="in_stock" className="block text-sm font-medium text-gray-700">In Stock</label>
-            <input id="in_stock" name="in_stock" type="number" placeholder="In Stock" required className="form-input mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" />
+            <label htmlFor="in_stock" className="flex items-center text-sm font-medium text-gray-700">
+              <span className="">In Stock</span>
+              <Tippy trigger="click" content="Enter the product name" placement="right">
+                <span className="mx-2 border-2 rounded-full px-2 text-xs border-gray-400 dark:border-gray-800 flex items-center justify-center w-5 h-5">!</span>
+              </Tippy>
+              <div className="relative flex items-center ml-auto">
+                <input
+                  type="checkbox"
+                  id="in_stock"
+                  className="sr-only"
+                  checked={inStockEnabled}
+                  onChange={handleToggleInStock}
+                />
+                <div className={`w-10 h-6 rounded-full shadow-inner ${inStockEnabled ? 'bg-blue-500' : 'bg-gray-300'}`}></div>
+                <div
+                  className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transform transition-transform ${inStockEnabled ? 'translate-x-4' : 'translate-x-0'}`}
+                ></div>
+              </div>
+            </label>
+
+            <input
+              id="in_stock"
+              name="in_stock"
+              type="number"
+              placeholder="In Stock"
+              required
+              value={inStock}
+              onChange={handleInStockChange}
+              disabled={!inStockEnabled} // Enable/disable input based on toggle
+              className={`form-input mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50 ${!inStockEnabled ? 'bg-gray-100 text-gray-900 cursor-not-allowed dark:text-black dark:bg-black' : ''}`}
+            />
+
           </div>
         </div>
+
         <div>
-          <label className="block text-sm font-medium text-gray-700">Upload Images</label>
+          <label className="block text-sm font-medium text-gray-700">
+            Product Images
+            <span className="text-red-500">*</span>
+            <Tippy trigger="click" content="Enter the product name" placement="right">
+              <span className="mx-3 border-2 rounded-full px-1.5 text-[9px] border-gray-400 dark:border-gray-800">!</span>
+            </Tippy>
+          </label>
           <ImageUploading multiple value={images2} onChange={onChange2} maxNumber={maxNumber}>
             {({ imageList, onImageUpload, onImageRemove }) => (
               <div>
@@ -218,16 +321,24 @@ const AddProductForm = () => {
                     </div>
                   ))}
                 </div>
+
+
               </div>
             )}
           </ImageUploading>
           {images2.length === 0 && (
+
             <img src="/assets/images/file-preview.svg" className="max-w-md w-1/3 mx-auto mt-4" alt="File Preview" />
           )}
         </div>
-        <button type="submit" className="bg-blue-500 text-white px-6 py-3 rounded-md mt-6">
-          Submit
-        </button>
+        <div className="flex justify-end">
+          <button
+            type="submit"
+            className="px-4 py-2 bg-blue-500 text-white rounded-md shadow-sm"
+          >
+            {loading ? 'Submitting...' : 'Submit'}
+          </button>
+        </div>
       </form>
     </div>
   );
