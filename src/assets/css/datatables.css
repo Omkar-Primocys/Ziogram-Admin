@@ -121,3 +121,7 @@ table tr .mantine-Checkbox-root {
 .table-hover.invoice-table > div:nth-child(2) {
     @apply !px-5;
 }
+
+.mantine-ScrollArea-viewport{
+    overflow: auto !important;
+}

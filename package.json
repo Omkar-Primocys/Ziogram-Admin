@@ -11,6 +11,8 @@
     "dependencies": {
         "@emotion/react": "^11.10.6",
         "@headlessui/react": "^2.1.2",
+        "@mantine/core": "^7.12.1",
+        "@mantine/hooks": "^7.12.1",
         "@popperjs/core": "^2.11.6",
         "@reduxjs/toolkit": "^1.8.5",
         "@testing-library/jest-dom": "^5.16.5",
