@@ -7,6 +7,7 @@ import ImageUploading, { ImageListType } from 'react-images-uploading';
 import useApiPost from '../../../hooks/PostData'; // Adjust the import path as necessary
 import Tippy from '@tippyjs/react';
 import 'tippy.js/dist/tippy.css';
+import AddVariantForm from '../ProductVarient/AddNewVarient';
 
 const AddProductForm = () => {
   const { loading, error, data, postData } = useApiPost();
@@ -340,6 +341,7 @@ const AddProductForm = () => {
           </button>
         </div>
       </form>
+      {/* <AddVariantForm productId={undefined}/> */}
     </div>
   );
 };

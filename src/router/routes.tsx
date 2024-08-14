@@ -11,6 +11,7 @@ import ListAllProduct from '../components/Ecommerce/Product/ListAllProduct';
 import AddProduct from '../pages/Pages/Ecom/Admin/AddProduct';
 import ViewProductById from '../components/Ecommerce/Product/ViewProductById';
 import EditProductForm from '../components/Ecommerce/Product/EditProduct';
+import ListAllPost from '../components/Social/Post/ListAllPost';
 
 
 const LoginBoxed = lazy(() => import('../pages/Authentication/LoginBoxed'));
@@ -81,6 +82,14 @@ const routes = [
     path: '/products/add-new-Product',
     element: (<ProtectedRoute>
       <AddProduct/>
+    </ProtectedRoute>),
+  },
+
+  // Socials
+  {
+    path: '/post/list-all-post',
+    element: (<ProtectedRoute>
+      <ListAllPost/>
     </ProtectedRoute>),
   },
 

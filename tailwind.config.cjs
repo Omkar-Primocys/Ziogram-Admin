@@ -2,6 +2,7 @@
 module.exports = {
     content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
     darkMode: 'class',
+    
     theme: {
         container: {
             center: true,
@@ -87,5 +88,6 @@ module.exports = {
             strategy: 'class',
         }),
         require('@tailwindcss/typography'),
+        
     ],
 };

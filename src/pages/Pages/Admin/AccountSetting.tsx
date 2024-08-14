@@ -181,6 +181,8 @@ const AccountSetting = () => {
                     'Content-Type': 'multipart/form-data', // Ensure the header is set
                 },
             });
+            console.log(response);
+            
 
             if (!response || response.success === false) {
                 setError(response.message || 'Profile update failed');
