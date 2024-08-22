@@ -57,7 +57,7 @@ const UserList: React.FC = () => {
 
     useEffect(() => {
         fetchUsers();
-    }, [currentPage, limit]);
+    }, [currentPage ,limit]);
 
     const handleView = (user: User) => {
         alert(`View user ${user.user_id}`);
@@ -143,21 +143,7 @@ const UserList: React.FC = () => {
             <div className='panel mt-6'>
                 <div className="flex justify-between items-center mb-5">
                     <h5 className="font-semibold text-lg dark:text-white-light">User List</h5>
-                    {/* <div className="flex items-center space-x-2">
-                        <label htmlFor="limit" className="font-semibold dark:text-white-light">
-                            Limit:
-                        </label>
-                        <select 
-                            id="limit"
-                            value={limit}
-                            onChange={(e) => setLimit(Number(e.target.value))}
-                            className="w-20 px-3 py-2 border rounded-md shadow-sm text-dark dark:text-white-light bg-white-light dark:bg-dark"
-                        >
-                            <option value={10}>10</option>
-                            <option value={20}>20</option>
-                            <option value={50}>50</option>
-                        </select>
-                    </div> */}
+                    
                 </div>
                 <div className="panel mt-6">
                     <div className="datatables">

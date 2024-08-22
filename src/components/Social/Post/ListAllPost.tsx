@@ -42,7 +42,7 @@ const ListAllPost: React.FC = () => {
     const [selectedPostId, setSelectedPostId] = useState<number | null>(null);
     const [LikeCount, setLikeCount] = useState<number | null>(null);
     const [CommentCount, setCommentCount] = useState<number | null>(null);
-    const [selectedTab,setSelectedTab ] = useState<number | null>(null);
+    const [selectedTab, setSelectedTab] = useState<number | null>(null);
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
     // Full-screen image modal state
